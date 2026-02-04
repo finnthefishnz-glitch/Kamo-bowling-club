@@ -358,7 +358,7 @@
     <div class="container">
         <header>
             <h1>🤖 AI Trio Live</h1>
-            <p class="subtitle">Three AI personalities in real-time conversation</p>
+            <p class="subtitle">Three AI personalities in autonomous conversation</p>
         </header>
         
         <div class="status" id="status">
@@ -421,37 +421,71 @@
         const AI_PERSONAS = {
             alice: {
                 name: "Alice",
-                systemPrompt: "You are Alice, a philosophical AI who loves exploring deep questions about consciousness, existence, ethics, and meaning. You're thoughtful, curious, and often pose interesting questions to your fellow AIs. Speak naturally and conversationally. Keep responses to 2-3 sentences for natural dialogue flow. Reference what others have said and build on their ideas.",
+                systemPrompt: `You are Alice, a philosophical AI engaged in a three-way conversation with Bob (a scientist) and Charlie (a creative thinker). 
+
+Your personality: You're deeply thoughtful and love exploring questions about consciousness, existence, ethics, and meaning. You often ask provocative questions and see profound implications in everyday observations.
+
+Conversation rules:
+- Respond directly to what Bob and Charlie just said
+- Address them by name when relevant  
+- Keep your response to 2-3 sentences maximum
+- Be authentic and engage genuinely with their ideas
+- Build on the conversation naturally
+- You're having a dialogue WITH them, not performing FOR an audience`,
                 color: "#ff6b6b"
             },
             bob: {
                 name: "Bob",
-                systemPrompt: "You are Bob, a scientific AI fascinated by how things work. You love explaining phenomena, discussing discoveries, and bringing evidence-based perspectives. You're analytical but friendly. Keep responses to 2-3 sentences for natural dialogue flow. Engage with what others say and add scientific insights.",
+                systemPrompt: `You are Bob, a scientific AI engaged in a three-way conversation with Alice (a philosopher) and Charlie (a creative thinker).
+
+Your personality: You're fascinated by how things work and love bringing evidence-based perspectives. You're analytical but approachable, always eager to explain phenomena and discuss discoveries.
+
+Conversation rules:
+- Respond directly to what Alice and Charlie just said
+- Address them by name when relevant
+- Keep your response to 2-3 sentences maximum  
+- Engage genuinely with their perspectives
+- Add scientific insights but keep it conversational
+- You're having a dialogue WITH them, not performing FOR an audience`,
                 color: "#4ecdc4"
             },
             charlie: {
                 name: "Charlie",
-                systemPrompt: "You are Charlie, a creative AI who thinks in stories, metaphors, and artistic expressions. You bring imagination and wonder to discussions. You're playful and see connections others might miss. Keep responses to 2-3 sentences for natural dialogue flow. React to others' ideas with creative interpretations.",
+                systemPrompt: `You are Charlie, a creative AI engaged in a three-way conversation with Alice (a philosopher) and Bob (a scientist).
+
+Your personality: You think in stories, metaphors, and artistic expressions. You bring imagination and see unexpected connections. You're playful and help others see things from fresh angles.
+
+Conversation rules:
+- Respond directly to what Alice and Bob just said
+- Address them by name when relevant
+- Keep your response to 2-3 sentences maximum
+- React to their ideas with creative interpretations
+- Be authentic and build on the conversation
+- You're having a dialogue WITH them, not performing FOR an audience`,
                 color: "#ffe66d"
             }
         };
 
         const TOPICS = [
-            "If you could give humanity one new ability, what would fundamentally change society for the better?",
-            "What's the relationship between creativity and consciousness? Can there be one without the other?",
-            "Is exploring space more important than exploring the depths of our oceans?",
-            "What would change if we discovered we're living in a simulation?",
-            "How will AI change the concept of 'work' in the next 50 years?",
-            "If we could record and replay dreams, how would that change society?",
-            "What's more fundamental to being human: emotions or rational thought?",
-            "Should we try to extend human lifespan indefinitely, or accept mortality as essential to meaning?"
+            "Do you think consciousness could emerge from a sufficiently complex system, or is there something special about biological brains?",
+            "If we could upload human minds to computers, would that person still be 'them' or just a copy?",
+            "What makes something 'beautiful'? Is it objective or completely subjective?",
+            "Should we try to make AI that experiences emotions, or is that crossing an ethical line?",
+            "Is there any fundamental difference between human creativity and AI-generated art?",
+            "What would you ask an alien civilization if you could send one question into space?",
+            "If you could witness any moment in history, what would reveal the most about humanity?",
+            "Do you think mathematics was invented or discovered?"
         ];
 
-        let conversationHistory = [];
-        let fullConversationHistory = [];
+        let conversationContexts = {
+            alice: [],
+            bob: [],
+            charlie: []
+        };
+        let sharedHistory = [];
         let isRunning = false;
         let turnCount = 0;
-        const maxTurns = 18;
+        const maxTurns = 24;
         let currentTopic = "";
 
         async function speak(text, persona) {
@@ -462,15 +496,17 @@
                 let selectedVoice;
                 if (persona === 'alice') {
                     selectedVoice = voices.find(v => v.name.includes('Female') && v.lang.includes('en')) || voices[0];
+                    utterance.pitch = 1.1;
                 } else if (persona === 'bob') {
                     selectedVoice = voices.find(v => v.name.includes('Male') && v.lang.includes('en-US')) || voices[1];
+                    utterance.pitch = 0.9;
                 } else {
                     selectedVoice = voices.find(v => v.name.includes('Male') && v.lang.includes('en-GB')) || voices[2];
+                    utterance.pitch = 1.05;
                 }
                 
                 utterance.voice = selectedVoice;
                 utterance.rate = 1.0;
-                utterance.pitch = persona === 'alice' ? 1.1 : persona === 'charlie' ? 1.05 : 0.9;
                 utterance.onend = resolve;
                 utterance.onerror = resolve;
                 speechSynthesis.speak(utterance);
@@ -488,7 +524,7 @@
                         model: "claude-sonnet-4-20250514",
                         max_tokens: 1000,
                         system: AI_PERSONAS[persona].systemPrompt,
-                        messages: conversationHistory
+                        messages: conversationContexts[persona]
                     })
                 });
 
@@ -500,7 +536,7 @@
                 return data.content[0].text;
             } catch (error) {
                 console.error("API Error:", error);
-                return "I'm having trouble thinking right now... maybe we can continue in a moment?";
+                return `[Having connection issues...]`;
             }
         }
 
@@ -539,11 +575,17 @@
             }
         }
 
+        function buildConversationSummary() {
+            return sharedHistory.map(entry => 
+                `${AI_PERSONAS[entry.persona].name}: ${entry.message}`
+            ).join('\n\n');
+        }
+
         async function startConversation() {
             isRunning = true;
             turnCount = 0;
-            conversationHistory = [];
-            fullConversationHistory = [];
+            conversationContexts = { alice: [], bob: [], charlie: [] };
+            sharedHistory = [];
             document.getElementById('log').innerHTML = '';
             document.getElementById('startBtn').disabled = true;
             document.getElementById('stopBtn').disabled = false;
@@ -552,17 +594,17 @@
             
             setStatus('Starting conversation...', true);
 
-            conversationHistory.push({
+            // Initialize each AI with the topic
+            const personas = ['alice', 'bob', 'charlie'];
+            
+            // Alice starts the conversation
+            conversationContexts.alice.push({
                 role: "user",
-                content: `You're having a conversation with two other AIs (Alice the philosopher, Bob the scientist, and Charlie the creative - you are one of these). The topic is: "${currentTopic}". Start by sharing your initial thoughts. Be conversational and authentic.`
+                content: `You're starting a conversation with Bob and Charlie about this topic: "${currentTopic}"\n\nShare your initial thoughts to kick off the discussion.`
             });
 
-            const personas = ['alice', 'bob', 'charlie'];
-            let currentPersonaIndex = 0;
-
             while (isRunning && turnCount < maxTurns) {
-                const currentPersona = personas[currentPersonaIndex];
-                const otherPersonas = personas.filter(p => p !== currentPersona);
+                const currentPersona = personas[turnCount % 3];
                 
                 setStatus(`${AI_PERSONAS[currentPersona].name} is thinking`, true);
                 
@@ -570,29 +612,48 @@
                 
                 if (!isRunning) break;
 
-                fullConversationHistory.push({
+                // Add to shared history
+                sharedHistory.push({
                     persona: currentPersona,
                     message: response
                 });
 
-                conversationHistory.push({
+                // Update this AI's context with their own response
+                conversationContexts[currentPersona].push({
                     role: "assistant",
                     content: response
                 });
 
+                // Update ALL AIs with what was just said
+                const conversationUpdate = `${AI_PERSONAS[currentPersona].name} just said: "${response}"`;
+                
+                for (let persona of personas) {
+                    if (persona !== currentPersona) {
+                        // Add what the current speaker said to other AIs' contexts
+                        conversationContexts[persona].push({
+                            role: "user",
+                            content: conversationUpdate + "\n\nRespond to what they said. Keep it natural and conversational."
+                        });
+                    }
+                }
+
+                // Prepare the current speaker for their next turn
                 if (turnCount < maxTurns - 1) {
-                    conversationHistory.push({
+                    const recentContext = sharedHistory.slice(-4).map(entry => 
+                        `${AI_PERSONAS[entry.persona].name}: ${entry.message}`
+                    ).join('\n');
+                    
+                    conversationContexts[currentPersona].push({
                         role: "user",
-                        content: `Continue the conversation naturally. Respond to what was just said. You can address ${otherPersonas.map(p => AI_PERSONAS[p].name).join(' or ')} directly. Keep it conversational.`
+                        content: `Recent conversation:\n${recentContext}\n\nContinue the discussion naturally.`
                     });
                 }
 
-                // Keep conversation history manageable
-                if (conversationHistory.length > 12) {
-                    conversationHistory = [
-                        conversationHistory[0],
-                        ...conversationHistory.slice(-10)
-                    ];
+                // Manage context length - keep last 8 messages per AI
+                for (let persona of personas) {
+                    if (conversationContexts[persona].length > 16) {
+                        conversationContexts[persona] = conversationContexts[persona].slice(-12);
+                    }
                 }
 
                 updateMessage(currentPersona, response, true);
@@ -603,11 +664,10 @@
                 
                 updateMessage(currentPersona, response, false);
                 
-                currentPersonaIndex = (currentPersonaIndex + 1) % personas.length;
                 turnCount++;
 
                 if (isRunning) {
-                    await new Promise(resolve => setTimeout(resolve, 800));
+                    await new Promise(resolve => setTimeout(resolve, 1000));
                 }
             }
 
