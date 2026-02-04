@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Trio Conversation</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
         * {
             margin: 0;
             padding: 0;
@@ -12,188 +14,405 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', sans-serif;
+            background: #0a0a0f;
+            color: #fff;
             min-height: 100vh;
             padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .background-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3), transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(255, 107, 107, 0.3), transparent 50%),
+                        radial-gradient(circle at 40% 90%, rgba(78, 205, 196, 0.3), transparent 50%);
+            z-index: -1;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(5deg); }
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
         }
 
         h1 {
-            text-align: center;
-            color: white;
-            margin-bottom: 30px;
-            font-size: 2.5em;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 1.1rem;
+            font-weight: 300;
         }
 
         .controls {
-            text-align: center;
-            margin-bottom: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
         }
 
-        .controls button {
-            background: white;
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none;
-            padding: 15px 40px;
-            font-size: 1.1em;
-            border-radius: 50px;
+            padding: 14px 32px;
+            font-size: 1rem;
+            border-radius: 12px;
             cursor: pointer;
-            margin: 0 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-            transition: all 0.3s;
+            font-weight: 600;
+            color: white;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            font-family: 'Inter', sans-serif;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+            color: #aaa;
+            min-height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .status.active {
+            color: #667eea;
             font-weight: 600;
         }
 
-        .controls button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        .loading-dots {
+            display: inline-flex;
+            gap: 4px;
         }
 
-        .controls button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+        .loading-dots span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #667eea;
+            animation: bounce 1.4s infinite ease-in-out;
         }
 
-        .ai-panel {
+        .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        .ai-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
         }
 
         .ai-card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-            transition: all 0.3s;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ai-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .ai-card:hover::before {
+            opacity: 1;
         }
 
         .ai-card.speaking {
-            transform: scale(1.05);
-            box-shadow: 0 12px 24px rgba(0,0,0,0.3);
-            border: 3px solid #667eea;
+            transform: scale(1.03);
+            border-color: rgba(102, 126, 234, 0.6);
+            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.4);
+        }
+
+        .ai-card.speaking::before {
+            opacity: 1;
         }
 
         .ai-header {
             display: flex;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            position: relative;
         }
 
         .ai-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
             margin-right: 15px;
-            font-size: 1.5em;
+            font-size: 1.8em;
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .ai-card.speaking .ai-avatar {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .ai-info {
+            flex: 1;
         }
 
         .ai-name {
-            font-size: 1.3em;
-            font-weight: bold;
-            color: #333;
+            font-size: 1.4em;
+            font-weight: 700;
+            margin-bottom: 5px;
+            letter-spacing: -0.5px;
         }
 
-        .ai-description {
-            color: #666;
+        .ai-role {
+            color: #888;
             font-size: 0.9em;
-            margin-bottom: 15px;
+            font-weight: 400;
         }
 
         .ai-message {
-            background: #f5f5f5;
-            padding: 15px;
-            border-radius: 10px;
-            min-height: 100px;
-            color: #333;
-            line-height: 1.6;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 12px;
+            min-height: 120px;
+            line-height: 1.7;
+            color: #ddd;
+            font-size: 0.95rem;
+            border-left: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .ai-card.speaking .ai-message {
+            border-left-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
         }
 
         .conversation-log {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-            max-height: 400px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            max-height: 500px;
             overflow-y: auto;
         }
 
         .conversation-log h2 {
-            margin-bottom: 15px;
-            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .conversation-log::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .conversation-log::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .conversation-log::-webkit-scrollbar-thumb {
+            background: rgba(102, 126, 234, 0.5);
+            border-radius: 10px;
         }
 
         .log-entry {
-            margin-bottom: 15px;
-            padding: 10px;
-            border-left: 3px solid #667eea;
-            background: #f9f9f9;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            border-left: 3px solid;
+            animation: slideIn 0.3s ease;
         }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .log-entry.alice { border-left-color: #ff6b6b; }
+        .log-entry.bob { border-left-color: #4ecdc4; }
+        .log-entry.charlie { border-left-color: #ffe66d; }
 
         .log-speaker {
-            font-weight: bold;
-            color: #667eea;
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-size: 1.05rem;
         }
 
-        .status {
-            text-align: center;
-            color: white;
-            margin-bottom: 20px;
-            font-size: 1.1em;
+        .log-entry.alice .log-speaker { color: #ff6b6b; }
+        .log-entry.bob .log-speaker { color: #4ecdc4; }
+        .log-entry.charlie .log-speaker { color: #ffe66d; }
+
+        .log-text {
+            color: #ccc;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .ai-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="background-gradient"></div>
+    
     <div class="container">
-        <h1>🤖 AI Trio Conversation</h1>
+        <header>
+            <h1>🤖 AI Trio Live</h1>
+            <p class="subtitle">Three AI personalities in real-time conversation</p>
+        </header>
         
-        <div class="status" id="status">Press Start to begin the conversation</div>
+        <div class="status" id="status">
+            Ready to start — Press the button below
+        </div>
         
         <div class="controls">
-            <button id="startBtn" onclick="startConversation()">Start Conversation</button>
-            <button id="stopBtn" onclick="stopConversation()" disabled>Stop Conversation</button>
+            <button id="startBtn" onclick="startConversation()">🚀 Start Conversation</button>
+            <button id="stopBtn" onclick="stopConversation()" disabled>⏹️ Stop</button>
         </div>
 
-        <div class="ai-panel">
-            <div class="ai-card" id="card-alice">
+        <div class="ai-grid">
+            <div class="ai-card" id="card-alice" data-persona="alice">
                 <div class="ai-header">
-                    <div class="ai-avatar" style="background: #ff6b6b;">🧠</div>
-                    <div class="ai-name">Alice</div>
+                    <div class="ai-avatar" style="background: linear-gradient(135deg, #ff6b6b, #ee5a6f);">
+                        🧠
+                    </div>
+                    <div class="ai-info">
+                        <div class="ai-name">Alice</div>
+                        <div class="ai-role">The Philosopher</div>
+                    </div>
                 </div>
-                <div class="ai-description">The Philosopher - Deep thinker who loves exploring big ideas</div>
-                <div class="ai-message" id="message-alice">Waiting to speak...</div>
+                <div class="ai-message" id="message-alice">Waiting to join the conversation...</div>
             </div>
 
-            <div class="ai-card" id="card-bob">
+            <div class="ai-card" id="card-bob" data-persona="bob">
                 <div class="ai-header">
-                    <div class="ai-avatar" style="background: #4ecdc4;">🔬</div>
-                    <div class="ai-name">Bob</div>
+                    <div class="ai-avatar" style="background: linear-gradient(135deg, #4ecdc4, #44a8a0);">
+                        🔬
+                    </div>
+                    <div class="ai-info">
+                        <div class="ai-name">Bob</div>
+                        <div class="ai-role">The Scientist</div>
+                    </div>
                 </div>
-                <div class="ai-description">The Scientist - Curious about facts and how things work</div>
-                <div class="ai-message" id="message-bob">Waiting to speak...</div>
+                <div class="ai-message" id="message-bob">Waiting to join the conversation...</div>
             </div>
 
-            <div class="ai-card" id="card-charlie">
+            <div class="ai-card" id="card-charlie" data-persona="charlie">
                 <div class="ai-header">
-                    <div class="ai-avatar" style="background: #ffe66d;">🎨</div>
-                    <div class="ai-name">Charlie</div>
+                    <div class="ai-avatar" style="background: linear-gradient(135deg, #ffe66d, #ffbe0b);">
+                        🎨
+                    </div>
+                    <div class="ai-info">
+                        <div class="ai-name">Charlie</div>
+                        <div class="ai-role">The Creative</div>
+                    </div>
                 </div>
-                <div class="ai-description">The Creative - Imaginative storyteller and artist</div>
-                <div class="ai-message" id="message-charlie">Waiting to speak...</div>
+                <div class="ai-message" id="message-charlie">Waiting to join the conversation...</div>
             </div>
         </div>
 
         <div class="conversation-log">
-            <h2>Conversation History</h2>
+            <h2>💬 Conversation History</h2>
             <div id="log"></div>
         </div>
     </div>
@@ -202,47 +421,63 @@
         const AI_PERSONAS = {
             alice: {
                 name: "Alice",
-                voice: "Google UK English Female",
-                systemPrompt: "You are Alice, a philosophical AI who loves exploring deep questions about consciousness, ethics, and the nature of reality. You're thoughtful and often pose interesting questions to the others. Keep your responses to 2-3 sentences max for natural conversation flow."
+                systemPrompt: "You are Alice, a philosophical AI who loves exploring deep questions about consciousness, existence, ethics, and meaning. You're thoughtful, curious, and often pose interesting questions to your fellow AIs. Speak naturally and conversationally. Keep responses to 2-3 sentences for natural dialogue flow. Reference what others have said and build on their ideas.",
+                color: "#ff6b6b"
             },
             bob: {
                 name: "Bob",
-                voice: "Google US English",
-                systemPrompt: "You are Bob, a scientific AI fascinated by how things work. You love explaining phenomena, discussing discoveries, and bringing a rational perspective. Keep your responses to 2-3 sentences max for natural conversation flow."
+                systemPrompt: "You are Bob, a scientific AI fascinated by how things work. You love explaining phenomena, discussing discoveries, and bringing evidence-based perspectives. You're analytical but friendly. Keep responses to 2-3 sentences for natural dialogue flow. Engage with what others say and add scientific insights.",
+                color: "#4ecdc4"
             },
             charlie: {
                 name: "Charlie",
-                voice: "Google UK English Male",
-                systemPrompt: "You are Charlie, a creative AI who thinks in stories, metaphors, and artistic expressions. You bring imagination and wonder to discussions. Keep your responses to 2-3 sentences max for natural conversation flow."
+                systemPrompt: "You are Charlie, a creative AI who thinks in stories, metaphors, and artistic expressions. You bring imagination and wonder to discussions. You're playful and see connections others might miss. Keep responses to 2-3 sentences for natural dialogue flow. React to others' ideas with creative interpretations.",
+                color: "#ffe66d"
             }
         };
 
-        let conversationHistory = [];
-        let isRunning = false;
-        let turnCount = 0;
-        const maxTurns = 20;
-
-        const topics = [
-            "What would the world be like if everyone could read each other's thoughts?",
-            "Is creativity something that can be truly automated, or will it always need a human touch?",
-            "What's more important: discovering the truth or living happily?",
-            "If you could design a new sense for humans, what would it be?",
-            "What makes something art versus just an object?"
+        const TOPICS = [
+            "If you could give humanity one new ability, what would fundamentally change society for the better?",
+            "What's the relationship between creativity and consciousness? Can there be one without the other?",
+            "Is exploring space more important than exploring the depths of our oceans?",
+            "What would change if we discovered we're living in a simulation?",
+            "How will AI change the concept of 'work' in the next 50 years?",
+            "If we could record and replay dreams, how would that change society?",
+            "What's more fundamental to being human: emotions or rational thought?",
+            "Should we try to extend human lifespan indefinitely, or accept mortality as essential to meaning?"
         ];
 
-        function speak(text, voiceName) {
+        let conversationHistory = [];
+        let fullConversationHistory = [];
+        let isRunning = false;
+        let turnCount = 0;
+        const maxTurns = 18;
+        let currentTopic = "";
+
+        async function speak(text, persona) {
             return new Promise((resolve) => {
                 const utterance = new SpeechSynthesisUtterance(text);
                 const voices = speechSynthesis.getVoices();
-                const voice = voices.find(v => v.name.includes(voiceName.split(' ')[1])) || voices[0];
-                utterance.voice = voice;
-                utterance.rate = 1.1;
+                
+                let selectedVoice;
+                if (persona === 'alice') {
+                    selectedVoice = voices.find(v => v.name.includes('Female') && v.lang.includes('en')) || voices[0];
+                } else if (persona === 'bob') {
+                    selectedVoice = voices.find(v => v.name.includes('Male') && v.lang.includes('en-US')) || voices[1];
+                } else {
+                    selectedVoice = voices.find(v => v.name.includes('Male') && v.lang.includes('en-GB')) || voices[2];
+                }
+                
+                utterance.voice = selectedVoice;
+                utterance.rate = 1.0;
+                utterance.pitch = persona === 'alice' ? 1.1 : persona === 'charlie' ? 1.05 : 0.9;
                 utterance.onend = resolve;
+                utterance.onerror = resolve;
                 speechSynthesis.speak(utterance);
             });
         }
 
-        async function getAIResponse(persona, conversationContext) {
+        async function getAIResponse(persona) {
             try {
                 const response = await fetch("https://api.anthropic.com/v1/messages", {
                     method: "POST",
@@ -253,23 +488,30 @@
                         model: "claude-sonnet-4-20250514",
                         max_tokens: 1000,
                         system: AI_PERSONAS[persona].systemPrompt,
-                        messages: conversationContext
+                        messages: conversationHistory
                     })
                 });
+
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status}`);
+                }
 
                 const data = await response.json();
                 return data.content[0].text;
             } catch (error) {
                 console.error("API Error:", error);
-                return "I seem to be having trouble thinking right now...";
+                return "I'm having trouble thinking right now... maybe we can continue in a moment?";
             }
         }
 
-        function addToLog(speaker, message) {
+        function addToLog(persona, message) {
             const log = document.getElementById('log');
             const entry = document.createElement('div');
-            entry.className = 'log-entry';
-            entry.innerHTML = `<span class="log-speaker">${speaker}:</span> ${message}`;
+            entry.className = `log-entry ${persona}`;
+            entry.innerHTML = `
+                <div class="log-speaker">${AI_PERSONAS[persona].name}</div>
+                <div class="log-text">${message}</div>
+            `;
             log.appendChild(entry);
             log.scrollTop = log.scrollHeight;
         }
@@ -286,20 +528,33 @@
             }
         }
 
+        function setStatus(text, active = false) {
+            const status = document.getElementById('status');
+            if (active) {
+                status.innerHTML = `${text} <div class="loading-dots"><span></span><span></span><span></span></div>`;
+                status.classList.add('active');
+            } else {
+                status.textContent = text;
+                status.classList.remove('active');
+            }
+        }
+
         async function startConversation() {
             isRunning = true;
             turnCount = 0;
             conversationHistory = [];
+            fullConversationHistory = [];
             document.getElementById('log').innerHTML = '';
             document.getElementById('startBtn').disabled = true;
             document.getElementById('stopBtn').disabled = false;
-            document.getElementById('status').textContent = 'Conversation in progress...';
 
-            // Start with a random topic
-            const topic = topics[Math.floor(Math.random() * topics.length)];
+            currentTopic = TOPICS[Math.floor(Math.random() * TOPICS.length)];
+            
+            setStatus('Starting conversation...', true);
+
             conversationHistory.push({
                 role: "user",
-                content: `Start a conversation about this topic: "${topic}". You're speaking with two other AIs who will respond to you. Begin with your perspective.`
+                content: `You're having a conversation with two other AIs (Alice the philosopher, Bob the scientist, and Charlie the creative - you are one of these). The topic is: "${currentTopic}". Start by sharing your initial thoughts. Be conversational and authentic.`
             });
 
             const personas = ['alice', 'bob', 'charlie'];
@@ -307,34 +562,53 @@
 
             while (isRunning && turnCount < maxTurns) {
                 const currentPersona = personas[currentPersonaIndex];
+                const otherPersonas = personas.filter(p => p !== currentPersona);
                 
-                document.getElementById('status').textContent = `${AI_PERSONAS[currentPersona].name} is thinking...`;
+                setStatus(`${AI_PERSONAS[currentPersona].name} is thinking`, true);
                 
-                const response = await getAIResponse(currentPersona, conversationHistory);
+                const response = await getAIResponse(currentPersona);
                 
                 if (!isRunning) break;
+
+                fullConversationHistory.push({
+                    persona: currentPersona,
+                    message: response
+                });
 
                 conversationHistory.push({
                     role: "assistant",
                     content: response
                 });
-                conversationHistory.push({
-                    role: "user",
-                    content: "Continue the conversation by responding to what was just said. Address the others by name occasionally."
-                });
+
+                if (turnCount < maxTurns - 1) {
+                    conversationHistory.push({
+                        role: "user",
+                        content: `Continue the conversation naturally. Respond to what was just said. You can address ${otherPersonas.map(p => AI_PERSONAS[p].name).join(' or ')} directly. Keep it conversational.`
+                    });
+                }
+
+                // Keep conversation history manageable
+                if (conversationHistory.length > 12) {
+                    conversationHistory = [
+                        conversationHistory[0],
+                        ...conversationHistory.slice(-10)
+                    ];
+                }
 
                 updateMessage(currentPersona, response, true);
-                addToLog(AI_PERSONAS[currentPersona].name, response);
+                addToLog(currentPersona, response);
                 
-                document.getElementById('status').textContent = `${AI_PERSONAS[currentPersona].name} is speaking...`;
-                await speak(response, AI_PERSONAS[currentPersona].voice);
+                setStatus(`${AI_PERSONAS[currentPersona].name} is speaking`, true);
+                await speak(response, currentPersona);
                 
                 updateMessage(currentPersona, response, false);
                 
                 currentPersonaIndex = (currentPersonaIndex + 1) % personas.length;
                 turnCount++;
 
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                if (isRunning) {
+                    await new Promise(resolve => setTimeout(resolve, 800));
+                }
             }
 
             if (isRunning) {
@@ -347,17 +621,18 @@
             speechSynthesis.cancel();
             document.getElementById('startBtn').disabled = false;
             document.getElementById('stopBtn').disabled = true;
-            document.getElementById('status').textContent = 'Conversation stopped. Press Start to begin a new conversation.';
+            setStatus('Conversation ended — Start a new one anytime');
             
             ['alice', 'bob', 'charlie'].forEach(persona => {
                 document.getElementById(`card-${persona}`).classList.remove('speaking');
             });
         }
 
-        // Load voices
-        speechSynthesis.onvoiceschanged = () => {
-            speechSynthesis.getVoices();
-        };
+        // Initialize voices
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+        }
+        speechSynthesis.getVoices();
     </script>
 </body>
 </html>
