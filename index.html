@@ -2,324 +2,98 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Chat Assistant</title>
+    <title>Kamo Bowling Club</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .chat-container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            width: 100%;
-            max-width: 800px;
-            height: 90vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .chat-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            text-align: center;
-            font-size: 24px;
-            font-weight: 600;
-        }
-
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .message {
-            display: flex;
-            gap: 10px;
-            max-width: 80%;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .message.user {
-            align-self: flex-end;
-            flex-direction: row-reverse;
-        }
-
-        .message.assistant {
-            align-self: flex-start;
-        }
-
-        .message-content {
-            padding: 12px 18px;
-            border-radius: 18px;
-            line-height: 1.5;
-            word-wrap: break-word;
-        }
-
-        .message.user .message-content {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .message.assistant .message-content {
-            background: #f0f0f0;
-            color: #333;
-        }
-
-        .chat-input-container {
-            padding: 20px;
-            background: #f9f9f9;
-            border-top: 1px solid #e0e0e0;
-        }
-
-        .chat-input-wrapper {
-            display: flex;
-            gap: 10px;
-        }
-
-        #userInput {
-            flex: 1;
-            padding: 12px 18px;
-            border: 2px solid #e0e0e0;
-            border-radius: 25px;
-            font-size: 16px;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        #userInput:focus {
-            border-color: #667eea;
-        }
-
-        #sendBtn {
-            padding: 12px 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 25px;
-            font-size: 16px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        #sendBtn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        #sendBtn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .typing-indicator {
-            display: none;
-            padding: 12px 18px;
-            background: #f0f0f0;
-            border-radius: 18px;
-            width: fit-content;
-        }
-
-        .typing-indicator.active {
-            display: block;
-        }
-
-        .typing-indicator span {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #999;
-            margin: 0 2px;
-            animation: typing 1.4s infinite;
-        }
-
-        .typing-indicator span:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-
-        .typing-indicator span:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-
-        @keyframes typing {
-            0%, 60%, 100% {
-                transform: translateY(0);
-            }
-            30% {
-                transform: translateY(-10px);
-            }
-        }
-
-        .welcome-message {
-            text-align: center;
-            color: #999;
-            padding: 40px 20px;
-            font-size: 18px;
+        body { font-family: Arial, sans-serif; margin: 0; background: #f8f9fa; }
+        header { background: #227f45; color: #fff; text-align: center; padding: 2em 0; }
+        nav { background: #155d2b; display: flex; justify-content: center; }
+        nav a { color: #fff; margin: 0 1em; text-decoration: none; padding: 1em; display: block; }
+        nav a:hover { background: #227f45; }
+        section { max-width: 900px; margin: 2em auto; background: #fff; padding: 2em; border-radius: 10px; box-shadow: 0 2px 8px #0001; }
+        h2 { color: #227f45; }
+        .events, .membership { display: flex; flex-wrap: wrap; gap: 2em; }
+        .event, .membership-info { flex: 1 1 250px; background: #f3faef; padding: 1em; border-radius: 8px; }
+        form { display: flex; flex-direction: column; gap: 1em; }
+        input, textarea { padding: 0.6em; border-radius: 4px; border: 1px solid #ccc; }
+        button { background: #227f45; color: #fff; border: none; padding: 0.8em; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #155d2b; }
+        footer { background: #227f45; color: #fff; text-align: center; padding: 1em 0; margin-top: 2em; }
+        @media (max-width: 600px) {
+            .events, .membership { flex-direction: column; }
         }
     </style>
 </head>
 <body>
-    <div class="chat-container">
-        <div class="chat-header">
-            🤖 AI Chat Assistant
-        </div>
-        <div class="chat-messages" id="chatMessages">
-            <div class="welcome-message">
-                👋 Hello! I'm your AI assistant. Ask me anything!
+    <header>
+        <h1>Kamo Bowling Club</h1>
+        <p>Your local destination for community, sport, and fun in Kamo!</p>
+    </header>
+    <nav>
+        <a href="#about">About</a>
+        <a href="#events">Events</a>
+        <a href="#membership">Membership</a>
+        <a href="#contact">Contact</a>
+    </nav>
+    <section id="about">
+        <h2>About Us</h2>
+        <p>
+            Welcome to Kamo Bowling Club! Established in 1967, we're proud to be a hub for social and competitive bowling in the Kamo community. 
+            Our club is open to all ages and skill levels. Whether you’re looking to compete or just have a roll-up, you’ll find a friendly welcome here.
+        </p>
+    </section>
+    <section id="events">
+        <h2>Upcoming Events</h2>
+        <div class="events">
+            <div class="event">
+                <h3>Club Night</h3>
+                <p>Every Friday from 6:30pm—Come and join us for friendly matches and a cuppa!</p>
+            </div>
+            <div class="event">
+                <h3>Open Day</h3>
+                <p>Next Open Day: Sunday, 16 June<br>
+                New members and beginners welcome!</p>
             </div>
         </div>
-        <div class="chat-input-container">
-            <div class="chat-input-wrapper">
-                <input 
-                    type="text" 
-                    id="userInput" 
-                    placeholder="Type your message..."
-                    autocomplete="off"
-                >
-                <button id="sendBtn">Send</button>
+    </section>
+    <section id="membership">
+        <h2>Membership</h2>
+        <div class="membership">
+            <div class="membership-info">
+                <h3>Join The Club</h3>
+                <p>
+                    Membership is open year-round for all ages. 
+                    <ul>
+                        <li>Annual Fee: $100 adult, $40 junior / student</li>
+                        <li>Access to all club facilities, coaching, and social events</li>
+                        <li>Discounted tournament entry</li>
+                    </ul>
+                    <strong>Just visit us on a Club Night or fill out the contact form below!</strong>
+                </p>
             </div>
         </div>
-    </div>
-
-    <script>
-        const chatMessages = document.getElementById('chatMessages');
-        const userInput = document.getElementById('userInput');
-        const sendBtn = document.getElementById('sendBtn');
-        
-        let conversationHistory = [];
-
-        function addMessage(role, content) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${role}`;
-            
-            const contentDiv = document.createElement('div');
-            contentDiv.className = 'message-content';
-            contentDiv.textContent = content;
-            
-            messageDiv.appendChild(contentDiv);
-            chatMessages.appendChild(messageDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        function showTypingIndicator() {
-            const typingDiv = document.createElement('div');
-            typingDiv.className = 'typing-indicator active';
-            typingDiv.id = 'typingIndicator';
-            typingDiv.innerHTML = '<span></span><span></span><span></span>';
-            chatMessages.appendChild(typingDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        function hideTypingIndicator() {
-            const typingIndicator = document.getElementById('typingIndicator');
-            if (typingIndicator) {
-                typingIndicator.remove();
-            }
-        }
-
-        async function sendMessage() {
-            const message = userInput.value.trim();
-            if (!message) return;
-
-            // Clear welcome message if it exists
-            const welcomeMessage = chatMessages.querySelector('.welcome-message');
-            if (welcomeMessage) {
-                welcomeMessage.remove();
-            }
-
-            // Add user message to UI
-            addMessage('user', message);
-            userInput.value = '';
-            sendBtn.disabled = true;
-
-            // Add to conversation history
-            conversationHistory.push({
-                role: 'user',
-                content: message
-            });
-
-            // Show typing indicator
-            showTypingIndicator();
-
-            try {
-                const response = await fetch('https://api.anthropic.com/v1/messages', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        model: 'claude-sonnet-4-20250514',
-                        max_tokens: 1000,
-                        messages: conversationHistory
-                    })
-                });
-
-                const data = await response.json();
-                
-                hideTypingIndicator();
-
-                if (data.content && data.content[0]) {
-                    const assistantMessage = data.content[0].text;
-                    addMessage('assistant', assistantMessage);
-                    
-                    // Add to conversation history
-                    conversationHistory.push({
-                        role: 'assistant',
-                        content: assistantMessage
-                    });
-                } else {
-                    addMessage('assistant', 'Sorry, I encountered an error. Please try again.');
-                }
-            } catch (error) {
-                hideTypingIndicator();
-                addMessage('assistant', 'Sorry, I encountered an error connecting to the AI. Please try again.');
-                console.error('Error:', error);
-            }
-
-            sendBtn.disabled = false;
-            userInput.focus();
-        }
-
-        sendBtn.addEventListener('click', sendMessage);
-        userInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
-        });
-
-        // Focus input on load
-        userInput.focus();
-    </script>
+    </section>
+    <section id="contact">
+        <h2>Contact</h2>
+        <form>
+            <label>
+                Name:
+                <input type="text" placeholder="Your Name" required>
+            </label>
+            <label>
+                Email:
+                <input type="email" placeholder="you@example.com" required>
+            </label>
+            <label>
+                Message:
+                <textarea rows="4" placeholder="Your message..." required></textarea>
+            </label>
+            <button type="submit" disabled>Send (Form demo only)</button>
+        </form>
+        <p>Or visit us at: 123 Bowling Green Rd, Kamo • Phone: (09) 123 4567</p>
+    </section>
+    <footer>
+        &copy; 2026 Kamo Bowling Club. Website by GitHub Copilot.
+    </footer>
 </body>
 </html>
